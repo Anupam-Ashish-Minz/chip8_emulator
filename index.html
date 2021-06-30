@@ -13,11 +13,45 @@ body {
 canvas {
   color: grey;
   background-color: #123;
+  border: 3px solid #111;
+}
+#on-screen-keboard {
+  display: grid;
+  grid-template-columns: repeat(4, auto);
+  width: 200px;
+}
+#on-screen-keboard button {
+  color: black;
+  background-color: white;
 }
 </style>
   </head>
   <body>
+    <h2>Screen</h2>
     <canvas id="canvas" width="600" height="400"></canvas>
+    <h2>Not working onscreen keyboard</h2>
+    <div id="on-screen-keboard">
+      <button>1</button>
+      <button>2</button>
+      <button>3</button>
+      <button>c</button>
+
+      <button>4</button>
+      <button>5</button>
+      <button>6</button>
+      <button>d</button>
+
+      <button>7</button>
+      <button>8</button>
+      <button>9</button>
+      <button>e</button>
+
+      <button>a</button>
+      <button>0</button>
+      <button>b</button>
+      <button>f</button>
+    </div>
   </body>
   <script type="module" src="/src/main.ts"></script>
+
 </html>

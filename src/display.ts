@@ -1,16 +1,16 @@
-interface RendererParams {
+export interface RendererParams {
     scale: number,
     canvas: HTMLCanvasElement,
     ctx: CanvasRenderingContext2D,
 }
 
-export default class Renderer {
+export default class Display {
     cols: number;
     rows: number;
     scale: number;
     canvas: HTMLCanvasElement;
     ctx: CanvasRenderingContext2D;
-    displayBuffer: Array<number>;
+    displayBuffer: Uint8Array
 
     constructor ({ scale, canvas, ctx }: RendererParams) {
         this.cols = 64;
@@ -19,7 +19,7 @@ export default class Renderer {
         this.canvas = canvas;
         this.canvas.width = this.cols * this.scale;
         this.canvas.height = this.rows * this.scale;
-        this.displayBuffer = new Array(this.cols * this.rows).fill(0);
+        this.displayBuffer = new Uint8Array(this.cols * this.rows).fill(0);
         this.ctx = ctx;
     }
     setPixel (x: number, y: number) {
