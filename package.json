@@ -11,5 +11,6 @@
   },
   "dependencies": {
     "jest": "^27.0.5"
-  }
+  },
+  "proxy": "http://localhost:4000/"
 }
