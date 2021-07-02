@@ -30,6 +30,7 @@ export default class Display {
     }
     clear () {
         this.displayBuffer = this.displayBuffer.fill(0);
+        this.draw();
     }
     draw () {
         this.ctx.clearRect(0, 0, this.cols, this.rows);

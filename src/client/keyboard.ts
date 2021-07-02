@@ -21,5 +21,11 @@ export default class Keyboard {
             70:  0xF, // F
         };
     }
+    pressedKey (): number {
+        document.onkeydown((e: KeyboardEvent) => {
+            console.log(e);
+        });
+        return 0;
+    }
 }
 
