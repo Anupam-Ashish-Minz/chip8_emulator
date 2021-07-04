@@ -56,25 +56,22 @@ export default class CPU {
         };
     }
     async exec (opcode: any) {
-        const firstNibble = opcode & 0xF000;
-        const nnn = opcode & 0x0FFF;
-        const kk = opcode & 0x00FF;
-        const x = opcode & 0x0F00 >> 8;
-        const y = opcode & 0x00F0 >> 4;
-        const lastNibble  = opcode & 0x000F;
+        const firstNibble = opcode & 0xF000; // don't perform bitshift on this one - see switch cases for clarification
+        const nnn = opcode & 0x0FFF; // last tree nibble
+        const kk = opcode & 0x00FF; // last two nibbles
+        const x = opcode & 0x0F00 >> 8; // third last nibble
+        const y = opcode & 0x00F0 >> 4; // second last nibble
+        const n = opcode & 0x000F; // last nibble
 
         switch(firstNibble) {
             case 0x0000:
-                switch (opcode) {
-                    case 0x00E0:
-                        this.display.clear;
-                    break;
-                    case 0x00E0:
-                        this.stack.pop();
-                    break;
-                    default:
-                    // TODO SYS
+                if (opcode === 0x00E0) {
+                    this.display.clear;
+                } else if (opcode === 0x00EE) {
+                    let stackValue = this.stack.pop();
+                    this.PC = stackValue ? stackValue : 0;
                 }
+                // SYS addr - only used by older chip8 computers so this can be safely ignored
             break;
             case 0x1000:
                 this.PC = nnn;
@@ -107,37 +104,37 @@ export default class CPU {
             break;
 
         case 0x8000:
-        if (lastNibble === 1) {
+        if (n === 1) {
             this.V[x] = this.V[y];
-        } else if (lastNibble === 0x2) {
+        } else if (n === 0x2) {
             this.V[x] = this.V[x] & this.V[y];
-        } else if (lastNibble === 0x3) {
+        } else if (n === 0x3) {
             this.V[x] = this.V[x] ^ this.V[y];
-        } else if (lastNibble === 0x4) {
+        } else if (n === 0x4) {
             const res = this.V[x] + this.V[y];
             this.VF = 0;
             if (res > 255) {
                 this.VF = 1;
             }
             this.V[x] = res;
-        } else if (lastNibble === 0x5) {
+        } else if (n === 0x5) {
             if (this.V[x] > this.V[y]) {
                 this.VF = 1; 
             } else {
                 this.VF = 0;
             }
             this.V[x] -= this.V[y];
-        } else if (lastNibble === 0x6) {
+        } else if (n === 0x6) {
             this.VF = this.V[x] & 1; // least significant bit
             this.V[x] = this.V[x] >> 1; 
-        } else if (lastNibble === 0x7) {
+        } else if (n === 0x7) {
             if (this.V[y] > this.V[x]) {
                 this.VF = 1;
             } else {
                 this.VF = 0;
             }
             this.V[x] = this.V[y] - this.V[x];
-        } else if (lastNibble === 0xE) {
+        } else if (n === 0xE) {
             this.VF = this.V[x] & 1; // least significant bit
             this.V[x] = this.V[x] << 1;
         }
@@ -177,6 +174,16 @@ export default class CPU {
                 this.soundTimer = this.V[x];
             } else if (kk === 0x29) {
                 this.I += this.V[x];
+            } else if (kk === 0x33) {
+                // TODO Store BCD representation of Vx in memory locations I, I+1, and I+2.
+            } else if (kk === 0x55) {
+                for (let i = 0; i < x+1; i++) {
+                    this.memory[this.I+i] = this.V[i];
+                }
+            } else if(kk === 0x65) {
+                for (let i = 0; i < x+1; i++) {
+                    this.V[i] = this.memory[this.I+i]
+                }
             }
         break;
         }
