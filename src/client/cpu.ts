@@ -160,7 +160,9 @@ export default class CPU {
             // TODO display
         break;
         case 0xE000:
-            if (this.keyboard.pressedKey() !== this.V[x]) {
+            if (kk === 0x9E) {
+                if (this.V[x] === this.keyboard.downkey) {
+                }
             }
         break;
         case 0xF000:
