@@ -1,6 +1,6 @@
 export default class Keyboard {
     keymap: {[key: string]: number}
-    downkey: number
+    isKeyDown: {[key: number]: boolean}
 
     constructor () {
         this.keymap = {
@@ -21,10 +21,36 @@ export default class Keyboard {
             'e': 0xE, // E
             'f': 0xF, // F
         };
-        this.downkey = -1;
-        document.addEventListener('keydown', (event: KeyboardEvent) => {
-            this.downkey = this.keymap[event.key];
-            console.log(this.downkey);
+        this.isKeyDown = {
+            0x0: false, 
+            0x1: false, 
+            0x2: false, 
+            0x3: false, 
+            0x4: false, 
+            0x5: false, 
+            0x6: false, 
+            0x7: false, 
+            0x8: false, 
+            0x9: false, 
+            0xA: false, 
+            0xB: false, 
+            0xC: false, 
+            0xD: false, 
+            0xE: false, 
+            0xF: false, 
+        };
+        window.addEventListener('keydown', (event: KeyboardEvent) => {
+            this.isKeyDown[this.keymap[event.key]] = true;
+        });
+        window.addEventListener('keyup', (event: KeyboardEvent) => {
+            this.isKeyDown[this.keymap[event.key]] = false;
+        });
+    }
+    getKeyPress (): Promise<number> {
+        return new Promise((resolve) => {
+            window.onkeydown = (event: KeyboardEvent) => {
+                resolve(this.keymap[event.key]);
+            }
         });
     }
 }

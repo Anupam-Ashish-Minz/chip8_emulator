@@ -55,7 +55,7 @@ export default class CPU {
             }
         };
     }
-    exec (opcode: any) {
+    async exec (opcode: any) {
         const firstNibble = opcode & 0xF000;
         const nnn = opcode & 0x0FFF;
         const kk = opcode & 0x00FF;
@@ -160,13 +160,24 @@ export default class CPU {
             // TODO display
         break;
         case 0xE000:
-            if (kk === 0x9E) {
-                if (this.V[x] === this.keyboard.downkey) {
-                }
+            if (kk === 0x9E && this.keyboard.isKeyDown[this.V[x]]) {
+                this.PC += 2;
+            } else if (kk === 0xA1 && !this.keyboard.isKeyDown[this.V[x]]) {
+                this.PC += 2;
             }
         break;
         case 0xF000:
-            // TODO keyboard
+            if (kk === 0x07) {
+                this.V[x] = this.delayTimer;
+            } else if (kk === 0x0A) {
+                this.V[x] = await this.keyboard.getKeyPress();
+            } else if (kk === 0x15) {
+                this.delayTimer = this.V[x];
+            } else if (kk === 0x18) {
+                this.soundTimer = this.V[x];
+            } else if (kk === 0x29) {
+                this.I += this.V[x];
+            }
         break;
         }
     }
