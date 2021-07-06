@@ -1,5 +1,2 @@
-# steps
-## keyboard
-## cpu
-- read a rom
-    - how ???
+# TODO
+- create some tests
