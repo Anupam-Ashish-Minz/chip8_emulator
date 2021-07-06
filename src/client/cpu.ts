@@ -34,6 +34,31 @@ export default class CPU {
         this.rom = new Set();
         this.display = display;
         this.keyboard = keyboard
+
+        this.loadSprites();
+    }
+    loadSprites () {
+        const sprite = [
+            0xF0, 0x90, 0x90, 0x90, 0xF0, // 0 
+            0x20, 0x60, 0x20, 0x20, 0x70, // 1
+            0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
+            0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
+            0x90, 0x90, 0xF0, 0x10, 0x10, // 4
+            0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
+            0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
+            0xF0, 0x10, 0x20, 0x40, 0x40, // 7
+            0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
+            0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
+            0xF0, 0x90, 0xF0, 0x90, 0x90, // A
+            0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
+            0xF0, 0x80, 0x80, 0x80, 0xF0, // C
+            0xE0, 0x90, 0x90, 0x90, 0xE0, // D
+            0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
+            0xF0, 0x80, 0xF0, 0x80, 0x80, // F
+        ];
+        for (let i=0; i<0x200; i++) {
+            this.memory[i] = sprite[i];
+        }
     }
     loadRom (rom: Uint8Array) {
         try {
@@ -154,7 +179,26 @@ export default class CPU {
             this.V[x] = Math.floor(Math.random() * 1000) % 255 & kk;
         break;
         case 0xD000:
-            // TODO display
+            console.log("drawing sprite");
+            const spriteData = this.memory.slice(this.I, n);
+            let spriteRowIdx = 0;
+            let spriteColumnIdx = 0;
+
+            for (const spriteRow of spriteData) {
+                const byteStr = ((spriteRow & 0xF0) >> 4).toString(2);
+                for (const bitStr of byteStr) {
+                    const bit = parseInt(bitStr);
+                    if (bit === 1) {
+                        this.display.setPixel(this.V[x] + spriteColumnIdx, this.V[y] + spriteRowIdx);
+                    }
+                    spriteColumnIdx += 1;
+                    if (spriteColumnIdx === 4) {
+                        spriteRowIdx += 1;
+                        spriteColumnIdx = 0;
+                    }
+                }
+            }
+            this.display.draw();
         break;
         case 0xE000:
             if (kk === 0x9E && this.keyboard.isKeyDown[this.V[x]]) {
@@ -175,7 +219,9 @@ export default class CPU {
             } else if (kk === 0x29) {
                 this.I += this.V[x];
             } else if (kk === 0x33) {
-                // TODO Store BCD representation of Vx in memory locations I, I+1, and I+2.
+                this.memory[this.I] = Math.floor(this.V[x] / 100);
+                this.memory[this.I+1] = Math.floor(this.V[x] / 10);
+                this.memory[this.I+2] = this.V[x];
             } else if (kk === 0x55) {
                 for (let i = 0; i < x+1; i++) {
                     this.memory[this.I+i] = this.V[i];

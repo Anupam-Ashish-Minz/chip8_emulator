@@ -39,7 +39,7 @@ export default class Display {
             if (this.displayBuffer[i] === 1) {
                 const x = i % this.cols;
                 const y = Math.floor(i / this.cols);
-                console.log(x, y);
+                //console.log(x, y);
                 this.ctx.fillRect(x*this.scale, y*this.scale, this.scale, this.scale);
             }
         }
