@@ -2,11 +2,11 @@ import Display from './display';
 import Keyboard from './keyboard';
 
 interface cpuInterface {
-    display: Display,
-    keyboard: Keyboard,
+    display?: Display,
+    keyboard?: Keyboard,
 }
 
-export default class CPU {
+export default class Cpu {
     memory: Uint8Array 
     V: Uint8Array
     I: number
@@ -17,8 +17,8 @@ export default class CPU {
     SP: number
     stack: Array<number>
     rom: Set<string>
-    display: Display
-    keyboard: Keyboard
+    display?: Display
+    keyboard?: Keyboard
 
     constructor ({display, keyboard}: cpuInterface) {
         this.memory = new Uint8Array(4096);
@@ -71,16 +71,20 @@ export default class CPU {
         }
     }
     cycle () {
-        for (let i = 0; i <= 0xFFF; i++) {
+        for (let i = 0; i <= 0xFFF; i+=2) {
             if (i >= 0x200 && i <= 0xFFF) {
-                // opcode is 2bytes in length
+                // opcode is 2 bytes in length
                 const opcode = this.memory[i] << 8 | this.memory[i+1];
-                i += 1;
                 this.exec(opcode);
             }
         };
+        if (!this.display) {
+            throw "initilize the display"
+        } else {
+            this.display.draw(); 
+        }
     }
-    async exec (opcode: any) {
+    async exec (opcode: number) {
         const firstNibble = opcode & 0xF000; // don't perform bitshift on this one - see switch cases for clarification
         const nnn = opcode & 0x0FFF; // last tree nibble
         const kk = opcode & 0x00FF; // last two nibbles
@@ -91,9 +95,14 @@ export default class CPU {
         switch(firstNibble) {
             case 0x0000:
                 if (opcode === 0x00E0) {
-                    this.display.clear;
+                    if (!this.display) {
+                        throw "initilize the display";
+                    } else {
+                        this.display.clear;
+                    }
                 } else if (opcode === 0x00EE) {
                     let stackValue = this.stack.pop();
+                    this.SP -= 1;
                     this.PC = stackValue ? stackValue : 0;
                 }
                 // SYS addr - only used by older chip8 computers so this can be safely ignored
@@ -189,6 +198,9 @@ export default class CPU {
                 for (const bitStr of byteStr) {
                     const bit = parseInt(bitStr);
                     if (bit === 1) {
+                        if (!this.display) {
+                            throw "initilize the display"
+                        }
                         this.display.setPixel(this.V[x] + spriteColumnIdx, this.V[y] + spriteRowIdx);
                     }
                     spriteColumnIdx += 1;
@@ -198,9 +210,11 @@ export default class CPU {
                     }
                 }
             }
-            this.display.draw();
         break;
         case 0xE000:
+            if (!this.keyboard) {
+                throw "initilize the keyboard first";
+            }
             if (kk === 0x9E && this.keyboard.isKeyDown[this.V[x]]) {
                 this.PC += 2;
             } else if (kk === 0xA1 && !this.keyboard.isKeyDown[this.V[x]]) {
@@ -211,6 +225,9 @@ export default class CPU {
             if (kk === 0x07) {
                 this.V[x] = this.delayTimer;
             } else if (kk === 0x0A) {
+                if (!this.keyboard) {
+                    throw "initlize the keyboard first"
+                }
                 this.V[x] = await this.keyboard.getKeyPress();
             } else if (kk === 0x15) {
                 this.delayTimer = this.V[x];
