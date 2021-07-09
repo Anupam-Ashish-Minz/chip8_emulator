@@ -56,6 +56,7 @@ export default class Cpu {
             0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
             0xF0, 0x80, 0xF0, 0x80, 0x80, // F
         ];
+        // see specifications - memory start address is 0x200
         for (let i=0; i<0x200; i++) {
             this.memory[i] = sprite[i];
         }
@@ -147,19 +148,19 @@ export default class Cpu {
         } else if (n === 0x3) {
             this.V[x] = this.V[x] ^ this.V[y];
         } else if (n === 0x4) {
-            const res = this.V[x] + this.V[y];
-            this.VF = 0;
-            if (res > 255) {
+            if ((this.V[x] + this.V[y]) > 255) {
                 this.VF = 1;
+            } else {
+                this.VF = 0;
             }
-            this.V[x] = res;
+            this.V[x] += this.V[y]; // overflow in handled by Uint8Array
         } else if (n === 0x5) {
             if (this.V[x] > this.V[y]) {
                 this.VF = 1; 
             } else {
                 this.VF = 0;
             }
-            this.V[x] -= this.V[y];
+            this.V[x] -= this.V[y]; // underflow is handled by Uint8Array
         } else if (n === 0x6) {
             this.VF = this.V[x] & 1; // least significant bit
             this.V[x] = this.V[x] >> 1; 
@@ -187,7 +188,7 @@ export default class Cpu {
             this.PC = nnn + this.V[0];
         break;
         case 0xC000:
-            this.V[x] = Math.floor(Math.random() * 1000) % 255 & kk;
+            this.V[x] = (Math.floor(Math.random() * 1000) % 0x100) & kk;
         break;
         case 0xD000:
             console.log("drawing sprite");
@@ -235,12 +236,18 @@ export default class Cpu {
                 this.delayTimer = this.V[x];
             } else if (kk === 0x18) {
                 this.soundTimer = this.V[x];
+            } else if (kk === 0x1E) {
+                this.I += this.V[x]; // no overflow I in a 16-bit register
+                if (this.I > 0xFFFF) {
+                    throw "the I register is 16 bit and the value in it exceeds that";
+                }
             } else if (kk === 0x29) {
-                this.I += this.V[x];
+                // 0x200 - start address, 5 - byte size of each sprite
+                this.I = 0x200 + (5 * this.V[x]);
             } else if (kk === 0x33) {
-                this.memory[this.I] = Math.floor(this.V[x] / 100);
-                this.memory[this.I+1] = Math.floor(this.V[x] / 10);
-                this.memory[this.I+2] = this.V[x];
+                this.memory[this.I] = Math.floor((this.V[x] % 1000) / 100);
+                this.memory[this.I+1] = Math.floor((this.V[x] % 100) / 10);
+                this.memory[this.I+2] = this.V[x] % 10;
             } else if (kk === 0x55) {
                 for (let i = 0; i < x+1; i++) {
                     this.memory[this.I+i] = this.V[i];

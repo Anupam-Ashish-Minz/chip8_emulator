@@ -16,6 +16,7 @@
   },
   "proxy": "http://localhost:4000/",
   "dependencies": {
+    "canvas": "^2.8.0",
     "jsdom": "^16.6.0"
   }
 }
