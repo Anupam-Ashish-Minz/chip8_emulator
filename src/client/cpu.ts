@@ -88,8 +88,8 @@ export default class Cpu {
         const firstNibble = opcode & 0xF000; // don't perform bitshift on this one - see switch cases for clarification
         const nnn = opcode & 0x0FFF; // last tree nibble
         const kk = opcode & 0x00FF; // last two nibbles
-        const x = opcode & 0x0F00 >> 8; // third last nibble
-        const y = opcode & 0x00F0 >> 4; // second last nibble
+        const x = (opcode & 0x0F00) >> 8; // third last nibble
+        const y = (opcode & 0x00F0) >> 4; // second last nibble
         const n = opcode & 0x000F; // last nibble
 
         switch(firstNibble) {
@@ -138,8 +138,10 @@ export default class Cpu {
             break;
 
         case 0x8000:
-        if (n === 1) {
+        if (n === 0x0) {
             this.V[x] = this.V[y];
+        } else if (n === 0x1) {
+            this.V[x] = this.V[x] | this.V[y];
         } else if (n === 0x2) {
             this.V[x] = this.V[x] & this.V[y];
         } else if (n === 0x3) {
@@ -154,10 +156,11 @@ export default class Cpu {
         } else if (n === 0x5) {
             if (this.V[x] > this.V[y]) {
                 this.VF = 1; 
+                this.V[x] -= this.V[y];
             } else {
                 this.VF = 0;
+                this.V[x] = this.V[y] - this.V[x];
             }
-            this.V[x] -= this.V[y];
         } else if (n === 0x6) {
             this.VF = this.V[x] & 1; // least significant bit
             this.V[x] = this.V[x] >> 1; 
