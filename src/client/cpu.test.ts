@@ -111,6 +111,12 @@ it("8xy4", () => {
     cpu.V[6] = 0x55;
     cpu.exec(opcode);
     expect(cpu.V[3]).toBe(0x33 + 0x55);
+    expect(cpu.VF).toBe(0);
+    cpu.V[3] = 0x88;
+    cpu.V[6] = 0xA9;
+    cpu.exec(opcode);
+    expect(cpu.V[3]).toBe((0x88 + 0xA9) % 0x100);
+    expect(cpu.VF).toBe(1);
 });
 
 it("8xy5", () => {
@@ -118,10 +124,12 @@ it("8xy5", () => {
     cpu.V[3] = 0x33;
     cpu.V[6] = 0x55;
     cpu.exec(opcode);
-    expect(cpu.V[3]).toBe(Math.abs(0x33 - 0x55));
+    expect(cpu.V[3]).toBe(0x100 - (0x55 - 0x33));
     expect(cpu.VF).toBe(0);
     opcode = 0x8635;
+    cpu.V[3] = 0x33;
+    cpu.V[6] = 0x55;
     cpu.exec(opcode);
-    expect(cpu.V[3]).toBe(0x55 - 0x33);
+    expect(cpu.V[6]).toBe(0x55 - 0x33);
     expect(cpu.VF).toBe(1);
 });

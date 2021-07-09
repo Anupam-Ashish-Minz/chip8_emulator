@@ -156,11 +156,10 @@ export default class Cpu {
         } else if (n === 0x5) {
             if (this.V[x] > this.V[y]) {
                 this.VF = 1; 
-                this.V[x] -= this.V[y];
             } else {
                 this.VF = 0;
-                this.V[x] = this.V[y] - this.V[x];
             }
+            this.V[x] -= this.V[y];
         } else if (n === 0x6) {
             this.VF = this.V[x] & 1; // least significant bit
             this.V[x] = this.V[x] >> 1; 
