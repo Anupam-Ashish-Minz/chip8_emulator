@@ -71,19 +71,11 @@ export default class Cpu {
             console.error("memory is full unable to load rom", e);
         }
     }
-    cycle () {
-        for (let i = 0; i <= 0xFFF; i+=2) {
-            if (i >= 0x200 && i <= 0xFFF) {
-                // opcode is 2 bytes in length
-                const opcode = this.memory[i] << 8 | this.memory[i+1];
-                this.exec(opcode);
-            }
-        };
-        if (!this.display) {
-            throw "initilize the display"
-        } else {
-            this.display.draw(); 
-        }
+    async cycle () {
+        // opcode is 2 bytes in length
+        const opcode = (this.memory[this.PC] << 8) | this.memory[this.PC+1];
+        this.PC += 2;
+        await this.exec(opcode);
     }
     async exec (opcode: number) {
         const firstNibble = opcode & 0xF000; // don't perform bitshift on this one - see switch cases for clarification
@@ -191,8 +183,7 @@ export default class Cpu {
             this.V[x] = (Math.floor(Math.random() * 1000) % 0x100) & kk;
         break;
         case 0xD000:
-            console.log("drawing sprite");
-            const spriteData = this.memory.slice(this.I, n);
+            const spriteData = this.memory.slice(this.I, this.I + n);
             let spriteRowIdx = 0;
             let spriteColumnIdx = 0;
 

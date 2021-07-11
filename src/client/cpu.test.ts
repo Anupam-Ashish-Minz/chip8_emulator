@@ -8,10 +8,20 @@ let cpu: Cpu;
 beforeEach(()=>{
     const canvas = document.createElement('canvas') as HTMLCanvasElement;
     const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
+    const display = new Display({scale: 10, canvas: canvas, ctx: ctx});
     cpu = new Cpu({
-        display: new Display({scale: 10, canvas: canvas, ctx: ctx}),
+        display: display,
         keyboard: new Keyboard(),
     });
+});
+
+it("00EE", () => {
+    const opcode = 0x00EE;
+    cpu.SP = 3;
+    cpu.stack.push(0x50A);
+    cpu.exec(opcode);
+    expect(cpu.PC).toBe(0x50A);
+    expect(cpu.SP).toBe(2);
 });
 
 it("1nnn", () => {
@@ -224,9 +234,8 @@ it("Cxkk", () => {
     expect(cpu.V[3] & 0xF).toBe(0);
 });
 
-//it("Dxyn", () => {
-//    // can't test draw calls
-//});
+it("Dxyn", () => {
+});
 
 //it("Ex9E", () => {
 //    // can't test something to do with the keyboard
