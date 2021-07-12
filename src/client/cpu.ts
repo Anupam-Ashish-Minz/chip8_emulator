@@ -91,7 +91,7 @@ export default class Cpu {
                     if (!this.display) {
                         throw "initilize the display";
                     } else {
-                        this.display.clear;
+                        this.display.clearBuffer;
                     }
                 } else if (opcode === 0x00EE) {
                     let stackValue = this.stack.pop();
