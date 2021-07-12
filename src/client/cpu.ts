@@ -183,27 +183,11 @@ export default class Cpu {
             this.V[x] = (Math.floor(Math.random() * 1000) % 0x100) & kk;
         break;
         case 0xD000:
-            const spriteData = this.memory.slice(this.I, this.I + n);
-            let spriteRowIdx = 0;
-            let spriteColumnIdx = 0;
-
-            for (const spriteRow of spriteData) {
-                const byteStr = ((spriteRow & 0xF0) >> 4).toString(2);
-                for (const bitStr of byteStr) {
-                    const bit = parseInt(bitStr);
-                    if (bit === 1) {
-                        if (!this.display) {
-                            throw "initilize the display"
-                        }
-                        this.display.setPixel(this.V[x] + spriteColumnIdx, this.V[y] + spriteRowIdx);
-                    }
-                    spriteColumnIdx += 1;
-                    if (spriteColumnIdx === 4) {
-                        spriteRowIdx += 1;
-                        spriteColumnIdx = 0;
-                    }
-                }
+            if (!this.display) {
+                throw "please initilize the display";
             }
+            const spriteData = this.memory.slice(this.I, this.I + n);
+            this.display.setSprite(this.V[x], this.V[y], spriteData);
         break;
         case 0xE000:
             if (!this.keyboard) {
