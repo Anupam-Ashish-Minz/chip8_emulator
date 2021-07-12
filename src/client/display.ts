@@ -24,36 +24,40 @@ export default class Display {
         this.ctx.clearRect(0, 0, this.cols, this.rows);
         this.ctx.fillStyle = "#aaa";
     }
-    setSprite(x: number, y: number, spriteData: Uint8Array): number {
-        let i = 0;
-        let j = 0;
-        let vf = 0;
-        for (const byteRow of spriteData) {
-            const getNbitArray = (n: number,b=32) => [...Array(b)].map((_,i)=>(n>>i)&1).reverse();
-            const bitsArray = getNbitArray((byteRow >> 4), 4);
-            for (const bit of bitsArray) {
-                const pixel = bit;
-                const pixelLoc = ((x + i) % this.cols) + (((y + j) % this.rows) * this.cols);
-                if (i === 3) {
-                    i = 0;
-                    j += 1;
-                } else {
-                    i += 1;
+    setSprite(x: number, y: number, n: number, spriteData: Uint8Array): number {
+        const width = 8;
+        const height = n;
+        const createBitArray = (num: number,b=32) => [...Array(b)].map((_,i)=>(num>>i)&1).reverse();
+
+        const bitStreamSpriteData = Array.from(spriteData).map((x: any) => createBitArray(x, width)).flat();
+
+        for (let i=0; i<height; i++) {
+            for (let j=0; j<width; j++) {
+                if (bitStreamSpriteData[j + i * width] === 1) {
+                    this.setPixel(x + j, y + i);
                 }
-                if (this.displayBuffer[pixelLoc] === 1 && pixel === 1) {
-                    vf = 1;
-                }
-                this.displayBuffer[pixelLoc] ^= pixel;
             }
         }
-        return vf;
+        return 0;
     }
     setPixel (x: number, y: number): number {
-        x = (this.cols + x) % this.cols; // rounding, out of bounds
-        y = (this.rows + y) % this.rows; // rounding 
-        const pixelLocation = x + (y * this.cols);
-        this.displayBuffer[pixelLocation] ^= 1;
-        return this.displayBuffer[pixelLocation] ^ 1
+        if (x > this.cols) {
+            x -= this.cols;
+        } else if (x < 0) {
+            x += this.cols;
+        }
+        
+        if (y > this.rows) {
+            y -= this.rows;
+        } else if (y < 0) {
+            y += this.rows;
+        }
+
+        let pixelLoc = x + (y * this.cols);
+
+        this.displayBuffer[pixelLoc] ^= 1;
+
+        return this.displayBuffer[pixelLoc] === 0 ? 1 : 0;
     }
     clearBuffer () {
         this.displayBuffer = this.displayBuffer.fill(0);
@@ -63,11 +67,12 @@ export default class Display {
     }
     draw () {
         this.clearScreen();
+        this.drawBoard();
         for (let i = 0; i < this.cols * this.rows; i++) {
             if (this.displayBuffer[i] === 1) {
-                const x = i % this.cols;
-                const y = Math.floor(i / this.cols);
-                this.ctx.fillRect(x*this.scale, y*this.scale, this.scale, this.scale);
+                const x = (i % this.cols) * this.scale;
+                const y = (Math.floor(i / this.cols)) * this.scale;
+                this.ctx.fillRect(x, y, this.scale, this.scale);
             }
         }
     }
@@ -78,11 +83,25 @@ export default class Display {
     }
     testSprite () {
         const sprite0 = Uint8Array.from([ 0xF0, 0x90, 0x90, 0x90, 0xF0 ]);
-        this.setSprite(0, 0, sprite0);
-        this.draw();
+        this.setSprite(0, 0, 5, sprite0);
 
         const sprite2 = Uint8Array.from([ 0xF0, 0x10, 0xF0, 0x80, 0xF0 ]);
-        this.setSprite(0, 0, sprite2);
-        this.draw();
+        this.setSprite(5, 0, 5, sprite2);
+    }
+    drawBoard() {
+      const bw = this.canvas.width;
+      const bh = this.canvas.height;
+      const p = 0;
+      for (var x = 0; x <= bw; x += this.scale) {
+          this.ctx.moveTo(0.5 + x + p, p);
+          this.ctx.lineTo(0.5 + x + p, bh + p);
+      }
+
+      for (var x = 0; x <= bh; x += this.scale) {
+          this.ctx.moveTo(p, 0.5 + x + p);
+          this.ctx.lineTo(bw + p, 0.5 + x + p);
+      }
+      this.ctx.strokeStyle = "black";
+      this.ctx.stroke();
     }
 }

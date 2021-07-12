@@ -20,12 +20,13 @@ const loadExternalRom = async () => {
 }
 
 const main = async () => {
-    //const rom = await loadExternalRom();
-    //cpu.loadRom(rom);
+    const rom = await loadExternalRom();
+    cpu.loadRom(rom);
+    display.testSprite();
     async function frame () {
-        //await cpu.cycle();
-        //display.draw();
-        display.testSprite();
+        await cpu.cycle();
+        display.draw();
+        requestAnimationFrame(frame);
     }
     await frame();
 }
