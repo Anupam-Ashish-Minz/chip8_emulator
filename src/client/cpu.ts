@@ -187,7 +187,7 @@ export default class Cpu {
                 throw "please initilize the display";
             }
             const spriteData = this.memory.slice(this.I, this.I + n);
-            this.display.setSprite(this.V[x], this.V[y], n, spriteData);
+            this.display.setSprite(this.V[x], this.V[y], spriteData);
         break;
         case 0xE000:
             if (!this.keyboard) {

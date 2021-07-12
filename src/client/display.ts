@@ -24,34 +24,24 @@ export default class Display {
         this.ctx.clearRect(0, 0, this.cols, this.rows);
         this.ctx.fillStyle = "#aaa";
     }
-    setSprite(x: number, y: number, n: number, spriteData: Uint8Array): number {
+    setSprite(x: number, y: number, spriteData: Uint8Array): number {
         const width = 8;
-        const height = n;
-        const createBitArray = (num: number,b=32) => [...Array(b)].map((_,i)=>(num>>i)&1).reverse();
-
-        const bitStreamSpriteData = Array.from(spriteData).map((x: any) => createBitArray(x, width)).flat();
+        const height = spriteData.length;
 
         for (let i=0; i<height; i++) {
+            let spriteRow = spriteData[i];
             for (let j=0; j<width; j++) {
-                if (bitStreamSpriteData[j + i * width] === 1) {
+                if ((spriteRow & 0x80) > 0) {
                     this.setPixel(x + j, y + i);
                 }
+                spriteRow = spriteRow << 1;
             }
         }
         return 0;
     }
     setPixel (x: number, y: number): number {
-        if (x > this.cols) {
-            x -= this.cols;
-        } else if (x < 0) {
-            x += this.cols;
-        }
-        
-        if (y > this.rows) {
-            y -= this.rows;
-        } else if (y < 0) {
-            y += this.rows;
-        }
+        x = Math.abs(x) % this.cols;
+        y = Math.abs(y) % this.rows;
 
         let pixelLoc = x + (y * this.cols);
 
@@ -83,10 +73,10 @@ export default class Display {
     }
     testSprite () {
         const sprite0 = Uint8Array.from([ 0xF0, 0x90, 0x90, 0x90, 0xF0 ]);
-        this.setSprite(0, 0, 5, sprite0);
+        this.setSprite(0, 0, sprite0);
 
         const sprite2 = Uint8Array.from([ 0xF0, 0x10, 0xF0, 0x80, 0xF0 ]);
-        this.setSprite(5, 0, 5, sprite2);
+        this.setSprite(70, 0, sprite2);
     }
     drawBoard() {
       const bw = this.canvas.width;
