@@ -37,6 +37,7 @@ export default class Cpu {
 
         this.loadSprites();
     }
+
     loadSprites () {
         const sprite = [
             0xF0, 0x90, 0x90, 0x90, 0xF0, // 0 
@@ -61,6 +62,7 @@ export default class Cpu {
             this.memory[i] = sprite[i];
         }
     }
+
     loadRom (rom: Uint8Array) {
         try {
             rom.forEach((bit, i) => {
@@ -71,12 +73,14 @@ export default class Cpu {
             console.error("memory is full unable to load rom", e);
         }
     }
+
     async cycle () {
         // opcode is 2 bytes in length
         const opcode = (this.memory[this.PC] << 8) | this.memory[this.PC+1];
         this.PC += 2;
         await this.exec(opcode);
     }
+
     async exec (opcode: number) {
         const firstNibble = opcode & 0xF000; // don't perform bitshift on this one - see switch cases for clarification
         const nnn = opcode & 0x0FFF; // last tree nibble
