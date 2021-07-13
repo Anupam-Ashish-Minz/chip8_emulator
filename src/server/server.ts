@@ -7,7 +7,7 @@ const port = 4000;
 console.log(`http://localhost:${port}/`);
 
 app.get("/api/rom", (req) => {
-  const rom = Deno.readFileSync("src/server/rom/programs/IBM Logo.ch8");
+  const rom = Deno.readFileSync("src/server/rom/chip8-roms/programs/IBM Logo.ch8");
   return Array.from(rom);
 });
 

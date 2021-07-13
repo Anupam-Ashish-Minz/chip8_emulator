@@ -85,111 +85,96 @@ export default class Cpu {
         const y = (opcode & 0x00F0) >> 4; // second last nibble
         const n = opcode & 0x000F; // last nibble
 
-        switch(firstNibble) {
-            case 0x0000:
-                if (opcode === 0x00E0) {
-                    if (!this.display) {
-                        throw "initilize the display";
-                    } else {
-                        this.display.clearBuffer;
-                    }
-                } else if (opcode === 0x00EE) {
-                    let stackValue = this.stack.pop();
-                    this.SP -= 1;
-                    this.PC = stackValue ? stackValue : 0;
+        if ( firstNibble === 0x0000 ) {
+            if (opcode === 0x00E0) {
+                if (!this.display) {
+                    throw "initilize the display";
+                } else {
+                    this.display.clearBuffer;
                 }
-                // SYS addr - only used by older chip8 computers so this can be safely ignored
-            break;
-            case 0x1000:
-                this.PC = nnn;
-            break;
-            case 0x2000:
-                this.SP += 1;
-                this.stack[this.SP] = this.PC;
-                this.PC = nnn;
-            break;
-            case 0x3000:
-                if (this.V[x] === kk) {
-                    this.PC += 2;
-                }
-            break;
-            case 0x4000:
-                if (this.V[x] != kk) {
-                    this.PC += 2;
-                }
-            break;
-            case 0x5000:
-                if (this.V[x] === this.V[y]) {
-                    this.PC += 2;
-                }
-            break;
-            case 0x6000:
-                this.V[x] = kk;
-            break;
-            case 0x7000:
-                this.V[x] += kk;
-            break;
-
-        case 0x8000:
-        if (n === 0x0) {
-            this.V[x] = this.V[y];
-        } else if (n === 0x1) {
-            this.V[x] = this.V[x] | this.V[y];
-        } else if (n === 0x2) {
-            this.V[x] = this.V[x] & this.V[y];
-        } else if (n === 0x3) {
-            this.V[x] = this.V[x] ^ this.V[y];
-        } else if (n === 0x4) {
-            if ((this.V[x] + this.V[y]) > 255) {
-                this.VF = 1;
-            } else {
-                this.VF = 0;
+            } else if (opcode === 0x00EE) {
+                let stackValue = this.stack.pop();
+                this.SP -= 1;
+                this.PC = stackValue ? stackValue : 0;
             }
-            this.V[x] += this.V[y]; // overflow in handled by Uint8Array
-        } else if (n === 0x5) {
-            if (this.V[x] > this.V[y]) {
-                this.VF = 1; 
-            } else {
-                this.VF = 0;
+            // SYS addr - only used by older chip8 computers so this can be safely ignored
+        } else if (firstNibble === 0x1000) {
+            this.PC = nnn;
+        } else if (firstNibble === 0x2000) {
+            this.SP += 1;
+            this.stack[this.SP] = this.PC;
+            this.PC = nnn;
+        } else if (firstNibble === 0x3000) {
+            if (this.V[x] === kk) {
+                this.PC += 2;
             }
-            this.V[x] -= this.V[y]; // underflow is handled by Uint8Array
-        } else if (n === 0x6) {
-            this.VF = this.V[x] & 1; // least significant bit
-            this.V[x] = this.V[x] >> 1; 
-        } else if (n === 0x7) {
-            if (this.V[y] > this.V[x]) {
-                this.VF = 1;
-            } else {
-                this.VF = 0;
+        } else if (firstNibble === 0x4000) {
+            if (this.V[x] != kk) {
+                this.PC += 2;
             }
-            this.V[x] = this.V[y] - this.V[x];
-        } else if (n === 0xE) {
-            this.VF = this.V[x] & 1; // least significant bit
-            this.V[x] = this.V[x] << 1;
+        } else if (firstNibble === 0x5000) {
+            if (this.V[x] === this.V[y]) {
+                this.PC += 2;
+            }
+        } else if (firstNibble === 0x6000) {
+            this.V[x] = kk;
+        } else if (firstNibble === 0x7000) {
+            this.V[x] += kk;
+        } else if (firstNibble === 0x8000) {
+            if (n === 0x0) {
+                this.V[x] = this.V[y];
+            } else if (n === 0x1) {
+                this.V[x] = this.V[x] | this.V[y];
+            } else if (n === 0x2) {
+                this.V[x] = this.V[x] & this.V[y];
+            } else if (n === 0x3) {
+                this.V[x] = this.V[x] ^ this.V[y];
+            } else if (n === 0x4) {
+                if ((this.V[x] + this.V[y]) > 255) {
+                    this.VF = 1;
+                } else {
+                    this.VF = 0;
+                }
+                this.V[x] += this.V[y]; // overflow in handled by Uint8Array
+            } else if (n === 0x5) {
+                if (this.V[x] > this.V[y]) {
+                    this.VF = 1; 
+                } else {
+                    this.VF = 0;
+                }
+                this.V[x] -= this.V[y]; // underflow is handled by Uint8Array
+            } else if (n === 0x6) {
+                this.VF = this.V[x] & 1; // least significant bit
+                this.V[x] = this.V[x] >> 1; 
+            } else if (n === 0x7) {
+                if (this.V[y] > this.V[x]) {
+                    this.VF = 1;
+                } else {
+                    this.VF = 0;
+                }
+                this.V[x] = this.V[y] - this.V[x];
+            } else if (n === 0xE) {
+                this.VF = this.V[x] & 1; // least significant bit
+                this.V[x] = this.V[x] << 1;
+            }
         }
-        break;
-        case 0x9000:
-        if (this.V[x] != this.V[y]) {
-            this.PC += 2;
-        }
-        break;
-        case 0xA000:
+        else if (firstNibble === 0x9000) {
+            if (this.V[x] != this.V[y]) {
+                this.PC += 2;
+            }
+        } else if (firstNibble === 0xA000) {
             this.I = nnn;
-        break;
-        case 0xB000:
+        } else if (firstNibble === 0xB000) {
             this.PC = nnn + this.V[0];
-        break;
-        case 0xC000:
+        } else if (firstNibble === 0xC000) {
             this.V[x] = (Math.floor(Math.random() * 1000) % 0x100) & kk;
-        break;
-        case 0xD000:
+        } else if (firstNibble === 0xD000) {
             if (!this.display) {
                 throw "please initilize the display";
             }
             const spriteData = this.memory.slice(this.I, this.I + n);
             this.display.setSprite(this.V[x], this.V[y], spriteData);
-        break;
-        case 0xE000:
+        } else if (firstNibble === 0xE000) {
             if (!this.keyboard) {
                 throw "initilize the keyboard first";
             }
@@ -198,8 +183,7 @@ export default class Cpu {
             } else if (kk === 0xA1 && !this.keyboard.isKeyDown[this.V[x]]) {
                 this.PC += 2;
             }
-        break;
-        case 0xF000:
+        } else if (firstNibble === 0xF000) {
             if (kk === 0x07) {
                 this.V[x] = this.delayTimer;
             } else if (kk === 0x0A) {
@@ -232,7 +216,6 @@ export default class Cpu {
                     this.V[i] = this.memory[this.I+i]
                 }
             }
-        break;
         }
     }
 }
