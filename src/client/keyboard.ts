@@ -45,6 +45,13 @@ export default class Keyboard {
         window.addEventListener('keyup', (event: KeyboardEvent) => {
             this.isKeyDown[this.keymap[event.key]] = false;
         });
+        const buttonKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' ];
+        for (let buttonKey of buttonKeys) {
+            const element = document.getElementById(`button${buttonKey}`);
+            element?.addEventListener('click', () => {
+                this.isKeyDown[this.keymap[buttonKey]] = !this.isKeyDown[this.keymap[buttonKey]];
+            });
+        }
     }
     getKeyPress (): Promise<number> {
         return new Promise((resolve) => {
