@@ -13,7 +13,7 @@
 
 - add roms
 `cd ./src/server/rom && 
-https://github.com/kripod/chip8-roms`
+git clone https://github.com/kripod/chip8-roms`
 
 - run client and server, you need both
 `npm run dev`
