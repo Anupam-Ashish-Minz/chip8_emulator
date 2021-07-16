@@ -19,19 +19,30 @@ const loadExternalRom = async () => {
         .catch((e) => console.log("faild to fetch", `error: ${e}`));
 }
 
+//  const main = async () => {
+    //  const rom = await loadExternalRom();
+    //  cpu.loadRom(rom);
+    //  //display.testSprite();
+    //  let then = Date.now();
+    //  async function frame () {
+        //  requestAnimationFrame(frame);
+        //  const elapsed = Date.now() - then;
+        //  if (elapsed > (1000 / fps)) {
+            //  then = Date.now();
+            //  await cpu.cycle();
+            //  display.draw();
+        //  }
+    //  }
+    //  await frame();
+//  }
+
 const main = async () => {
     const rom = await loadExternalRom();
     cpu.loadRom(rom);
-    //display.testSprite();
-    let then = Date.now();
-    async function frame () {
+    const frame = async () => {
+        await cpu.cycle();
+        display.draw();
         requestAnimationFrame(frame);
-        const elapsed = Date.now() - then;
-        if (elapsed > (1000 / fps)) {
-            then = Date.now();
-            await cpu.cycle();
-            display.draw();
-        }
     }
     await frame();
 }

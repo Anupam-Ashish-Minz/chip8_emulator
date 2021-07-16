@@ -41,18 +41,36 @@ export default class Keyboard {
         };
         window.addEventListener('keydown', (event: KeyboardEvent) => {
             this.isKeyDown[this.keymap[event.key]] = true;
+            this.activeKeyPaint();
         });
         window.addEventListener('keyup', (event: KeyboardEvent) => {
             this.isKeyDown[this.keymap[event.key]] = false;
+            this.activeKeyPaint();
         });
         const buttonKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' ];
         for (let buttonKey of buttonKeys) {
             const element = document.getElementById(`button${buttonKey}`);
             element?.addEventListener('click', () => {
                 this.isKeyDown[this.keymap[buttonKey]] = !this.isKeyDown[this.keymap[buttonKey]];
+                this.activeKeyPaint();
             });
         }
     }
+
+    activeKeyPaint () {
+        for (const key in this.isKeyDown) {
+            const buttonKey = Object.keys(this.keymap).find(k => this.keymap[k] === parseInt(key));
+            const elem = document.getElementById(`button${buttonKey}`)
+            if (elem) {
+                if (this.isKeyDown[key] === true) {
+                    elem.style.backgroundColor = '#32CC00';
+                } else {
+                    elem.style.backgroundColor = 'white';
+                }
+            }
+        }
+    }
+
     getKeyPress (): Promise<number> {
         return new Promise((resolve) => {
             window.onkeydown = (event: KeyboardEvent) => {
